@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Smart Community Issue Management System</title>
+
+    <style>
+        body{
+            font-family: Arial;
+            background:#f4f4f4;
+            margin:0;
+        }
+
+        header{
+            background:#2c3e50;
+            color:white;
+            text-align:center;
+            padding:20px;
+        }
+
+        .container{
+            width:80%;
+            margin:auto;
+            padding:20px;
+        }
+
+        .card{
+            background:white;
+            padding:20px;
+            margin-top:20px;
+            border-radius:8px;
+            box-shadow:0 0 10px rgba(0,0,0,0.1);
+        }
+
+        input, textarea, select{
+            width:100%;
+            padding:10px;
+            margin:10px 0;
+        }
+
+        button{
+            background:#27ae60;
+            color:white;
+            border:none;
+            padding:10px 20px;
+            cursor:pointer;
+        }
+
+        table{
+            width:100%;
+            border-collapse:collapse;
+            margin-top:20px;
+        }
+
+        table, th, td{
+            border:1px solid #ddd;
+        }
+
+        th, td{
+            padding:10px;
+            text-align:left;
+        }
+
+        th{
+            background:#34495e;
+            color:white;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>Smart Community Issue Management System</h1>
+</header>
+
+<div class="container">
+
+    <div class="card">
+        <h2>Report Issue</h2>
+
+         <form>
+         <form>
+    <label>Full Name</label>
+    <input type="text" placeholder="Enter your name" required>
+
+    <label>Address</label>
+    <textarea placeholder="Enter pickup address" required></textarea>
+
+    <label>Garbage Type</label>
+    <select required>
+        <option value="">Select Garbage Type</option>
+        <option>Household Waste</option>
+        <option>Plastic Waste</option>
+        <option>Electronic Waste</option>
+        <option>Construction Waste</option>
+    </select>
+
+    <label>Phone Number</label>
+    <input type="tel" placeholder="Enter phone number" required>
+
+    <button type="submit">Submit Request</button>
+</form>
+    </div>
+
+    <div class="card">
+        <h2>Reported Issues</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+
+            <tbody id="issueTable">
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+
+function submitIssue(){
+
+    const name = document.getElementById('name').value.trim();
+    const contact = document.getElementById('contact').value.trim();
+    const category = document.getElementById('category').value;
+    const description = document.getElementById('description').value.trim();
+
+    if(name === "" || contact === "" || description === ""){
+        alert("All fields are required!");
+        return;
+    }
+
+    if(!/^\d{10}$/.test(contact)){
+        alert("Enter a valid 10-digit contact number");
+        return;
+    }
+
+    const data = {
+        name: name,
+        contact: contact,
+        category: category,
+        description: description
+    };
+
+    fetch('/report',{
+        method:'POST',
+        headers:{
+            'Content-Type':'application/json'
+        },
+        body:JSON.stringify(data)
+    })
+    .then(res=>res.json())
+    .then(data=>{
+        alert(data.message);
+
+        document.getElementById('name').value = '';
+        document.getElementById('contact').value = '';
+        document.getElementById('description').value = '';
+
+        loadIssues();
+    });
+}
+
+function loadIssues(){
+
+    fetch('/issues')
+    .then(res=>res.json())
+    .then(issues=>{
+
+        let table='';
+
+        issues.forEach(issue=>{
+
+            table += `
+            <tr>
+                <td>${issue.id}</td>
+                <td>${issue.name}</td>
+                <td>${issue.contact}</td>
+                <td>${issue.category}</td>
+                <td>${issue.description}</td>
+                <td>${issue.status}</td>
+            </tr>`;
+        });
+
+        document.getElementById('issueTable').innerHTML = table;
+    });
+}
+
+loadIssues();
+
+</script>
+
+</body>
+</html>
